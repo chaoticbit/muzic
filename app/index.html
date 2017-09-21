@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="bower_components/semantic/dist/semantic.min.css">
+    <link rel="stylesheet" href="styles/main.css">    
+    <link rel="stylesheet" href="styles/grids.css">
+    <link rel="stylesheet" href="styles/grids-responsive.css">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="muzicApp">
+    <!--[if lte IE 8]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <!-- Add your site or application content here -->
+    <div class="ui blue inverted fixed menu top-menu" ng-show="isLoggedIn">
+        <a class="item">
+            MUZIC
+        </a>
+        <div class="right menu">
+            <div class="item">
+                <div class="ui search">
+                    <div class="ui inverted transparent icon input">
+                        <input class="prompt" type="text" placeholder="Search">
+                        <i class="search icon"></i>
+                    </div>
+                    <div class="results"></div>
+                </div>
+            </div>
+            <div class="ui dropdown item" ng-cloak>
+                {{userInfo.fname}} <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item">Profile</a>
+                    <a class="item">Settings</a>
+                    <a class="item" ng-click="logout()">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui container main-container">
+        <div ng-view=""></div>     
+        <div class="seekBase" seek-track>
+        <div class="seekLoad" ng-style="{width : ( progress + '%' ) }">            
+        </div>
+        <i class="circle icon seekLoadIcon" ng-show="progress > 0" ng-style="{marginLeft : ( progress - 0.5 + '%' ) }"></i>
+    </div>                
+    </div>  
+    <sound-manager></sound-manager>    
+    <div class="media-player-mobile show-mobile" ng-show="isLoggedIn">
+        <div class="pure-g">
+            <div class="pure-u-1" style="padding: 6px 15px;">
+                <div class="song-title">{{currentPlaying.title}}</div>
+                <button play-pause-toggle 
+                        data-play="<i class='play icon large' style='text-indent:5px;line-height: 18px;'></i>" 
+                        data-pause="<i class='pause icon large' style='text-indent: 5px;line-height: 18px;'></i>" 
+                        class="circular large ui icon button bg-transparent play-pause-toggle-btn">
+                    <i ng-class="{'play icon large': !isPlaying, 'pause icon large': isPlaying}" style="text-indent: 5px;line-height: 18px;"></i>
+                </button>
+                <button class="circular large ui icon button bg-transparent" style="text-indent:5px;line-height: 18px;">
+                    <i class="forward step large icon"></i>
+                </button>            
+            </div>
+        </div>
+    </div>
+    <div class="media-player hidden-for-mobile" ng-show="isLoggedIn">
+        <div class="pure-g">
+            <div class="pure-u-md-1-5 hidden-for-mobile cover-image" style="background: url('{{currentPlaying.cover_art_url}}');"></div>
+            <div class="pure-u-1 pure-u-md-1-4 pure-u-sm-1 metadata">
+                <p class=""><span class="bold">{{currentPlaying.title}}</span><br><span class="fg-gray">    {{currentPlaying.artist}}</span></p>                
+                <button class="ui icon button bg-transparent text-right">
+                    <i class="ellipsis vertical icon"></i>
+                </button>                           
+            </div>
+            <div class="pure-u-1 pure-u-md-1-3 pure-u-sm-1  media-controls">                
+                <button repeat-music class="circular ui icon button repeat-btn" ng-class="{'bg-transparent': !repeat}">
+                    <i class="retweet icon"></i>
+                </button>            
+                <button class="circular ui icon button bg-transparent">
+                    <i class="backward step icon"></i>
+                </button>                
+                <button play-pause-toggle 
+                        data-play="<i class='play icon large fg-white' style='text-indent:5px;line-height: 18px;'></i>" 
+                        data-pause="<i class='pause icon large fg-white' style='text-indent: 1px;line-height: 20px;'></i>" 
+                        class="circular large ui icon button bg-primary play-pause-toggle-btn">
+                    <i ng-class="{'play icon large fg-white': !isPlaying, 'pause icon large fg-white': isPlaying}" style="text-indent: 5px;line-height: 18px;"></i>
+                </button>
+                <button class="circular ui icon button bg-transparent">
+                    <i class="forward step icon"></i>
+                </button>            
+                <button stop-music class="circular ui icon button bg-transparent">
+                    <i class="stop icon"></i>
+                </button>            
+            </div>
+            <div class="pure-u-1 pure-u-md-1-3">
+                <label style="line-height: 65px;" ng-show="progress > 0">{{ currentPostion }} / {{ currentDuration }}</label>
+                <button class="circular ui toggle icon button bg-transparent pull-right playlist-btn" style="margin-top: 14px;">
+                    <i class="music icon" style="position: inherit;"></i>                    
+                </button>    
+                <button mute-music class="circular ui toggle icon button bg-transparent pull-right mute-btn" style="margin-top: 14px;">
+                    <i ng-class="{'volume up icon': !mute, 'volume off icon': mute}" style="position: inherit;"></i>                    
+                </button>                    
+            </div>
+        </div>        
+    </div>        
+    <div class="playlist-popover" ng-show="isLoggedIn">    
+        <div class="pure-g">
+            <!-- <div class="pure-u-1 pure-u-md-1-2 hidden-for-mobile"></div>             -->
+            <div class="pure-u-1 pure-u-md-1-2 pure-u-sm-1 bg-white popover-container empty" ng-show="playlist.length <= 0">                
+                <div>
+                    <div class="material-empty">
+                        <i class="icon music huge fg-grayLight"></i>
+                        <div class="empty-message text-center fg-gray">Your queue is empty</div>
+                        <div class="empty-sub-message text-center">Start some music or click the  icon on an album, song, or playlist to add it to your queue</div>
+                    </div>
+                </div>
+            </div>
+            <div class="pure-u-1 pure-u-md-1-2 pure-u-sm-1 bg-white popover-container" ng-show="playlist.length > 0">                
+                <div class="pure-g">
+                    <div class="pure-u-1 cover-art-section" style="background: url('{{default_cover_art_url}}') no-repeat center bottom;">
+                        <div class="ui header fg-white">Now Playing</div>
+                        <div class="ui header fg-white">{{playlist.length}} tracks</div>
+                    </div>
+                    <div class="pure-u-1 playlist-section">                        
+                        <table class="ui very basic selectable table">
+                            <thead>
+                                <tr>
+                                    <th class="one wide">
+                                        <!-- <div class="cover-art-thumbnail"></div> -->
+                                    </th>
+                                    <th class="ten wide">Song</th>
+                                    <th class="three wide">Duration</th>
+                                    <th class="two wide">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="song in playlist">
+                                    <td style="padding: 10px;">
+                                        <div class="cover-art-thumbnail" style="background: url('{{ song.cover_art_url }}') no-repeat center;"></div>
+                                    </td>
+                                    <td>{{song.title }}<br><small class="fg-black">{{ song.artist }}</small></td>
+                                    <td>{{currentDuration}}</td>
+                                    <td>
+                                        <button class="ui icon button bg-transparent text-right">
+                                            <i class="ellipsis vertical icon"></i>
+                                        </button>                           
+                                    </td>
+                                </tr>                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>                
+            <div class="arrow-down"></div>
+        </div>                        
+    </div>
+    <!-- <div class="popover-wrapper"></div>     -->
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+     <script>
+       !function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=l,A[l]=A[l]||function(){
+       (A[l].q=A[l].q||[]).push(arguments)},A[l].l=+new Date,a=n.createElement(g),
+       r=n.getElementsByTagName(g)[0],a.src=u,r.parentNode.insertBefore(a,r)
+       }(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-XXXXX-X');
+       ga('send', 'pageview');
+    </script>
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script src="bower_components/angular-messages/angular-messages.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-touch/angular-touch.js"></script>
+    <script src="bower_components/semantic/dist/semantic.js"></script>
+    <script src="bower_components/lodash/lodash.js"></script>
+    <script src="bower_components/angular-soundmanager2/dist/angular-soundmanager2.js"></script>
+    <script src="bower_components/moment/moment.js"></script>
+    <script src="bower_components/angular-local-storage/dist/angular-local-storage.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+        <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <script src="scripts/app.js"></script>        
+        <script src="scripts/constants/ApiConfig.js"></script>
+        <script src="scripts/controllers/main.js"></script>
+        <script src="scripts/controllers/about.js"></script>
+        <script src="scripts/id3.min.js"></script>
+        <script src="scripts/controllers/login.js"></script>        
+        <script src="scripts/services/authenticationservice.js"></script>
+        <!-- endbuild -->
+</body>
+</html>

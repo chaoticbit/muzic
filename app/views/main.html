@@ -1,0 +1,36 @@
+<div class="ui six cards special stackable">
+  <div class="card" ng-repeat="song in songList track by $index" my-post-repeat-directive>
+    <div class="blurring dimmable image" style="height: 150px;overflow:hidden;">
+      <div class="ui dimmer">
+        <div class="content">
+          <div class="center cursor" music-player="play" add-song="song">
+            <i class="ui icon huge play"></i>
+          </div>
+        </div>
+      </div>
+      <img src="{{song.cover_art_url}}" style="height: 200px;">
+    </div>
+    <div class="content">
+      <p class="header" style="font-size: 16px;font-weight: 300;margin-bottom: 5px;">{{song.title}}</p>
+      <div class="meta">
+        <span class="date">{{song.artist}}</span>
+      </div>
+    </div>    
+  </div>
+</div>
+<!-- <ul>
+    <li ng-repeat="song in songList">
+        <button music-player="play" add-song="song">{{ song.title }}</button>
+        <button music-player add-song="song">+</button>
+    </li>
+</ul> -->
+<ul>
+    <li ng-repeat="song in playlist">
+        <a play-from-playlist="song">{{ song.title }}</a>
+        -
+        <a remove-from-playlist="song" data-index="{{$index}}">
+            <small>(remove)</small>
+        </a>
+        <span ng-if="currentPlaying.id == song.id"> - (current)</span>
+    </li>
+</ul>
